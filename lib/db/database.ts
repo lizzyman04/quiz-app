@@ -2,10 +2,7 @@ import Dexie, { Table } from 'dexie';
 import { Session, Student, Class, Subject } from '../types';
 import { SyncQueueItem, PendingScore, SessionWithQuestions } from './types';
 
-/**
- * Main IndexedDB database class using Dexie.js.
- * Handles offline storage for quiz sessions, scores, and entity caches.
- */
+// Handles offline storage for quiz sessions, scores, and entity caches
 export class QuizDatabase extends Dexie {
   sessions!: Table<SessionWithQuestions, number>;
   pendingScores!: Table<PendingScore, number>;

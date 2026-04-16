@@ -5,9 +5,6 @@ export const generateLocalId = (): string => {
   return crypto.randomUUID();
 };
 
-/**
- * Returns the current timestamp in ISO format.
- */
 export const getCurrentTimestamp = (): string => {
   return new Date().toISOString();
 };
