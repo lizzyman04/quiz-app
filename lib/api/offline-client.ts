@@ -1,13 +1,36 @@
-import { SyncQueueItem } from '../db/types';
-import { queueMutation } from '../db/sync-queue';
-import { getCachedClasses, cacheClasses, getCachedStudents, cacheStudents, getCachedSubjects, cacheSubjects } from '../db/cache';
+import type { Class, Student, Subject } from '../types';
+import { cacheClasses, cacheStudents, cacheSubjects, getCachedClasses, getCachedStudents, getCachedSubjects } from '../db/cache';
 import { getCachedSessions } from '../db/sessions';
-import { Class, Student, Subject } from '../types';
+import { queueMutation } from '../db/sync-queue';
+import type { SyncQueueItem } from '../db/types';
+
+type CachePayload = 
+  | { key: 'classes'; data: Class[] }
+  | { key: 'students'; data: Student[] }
+  | { key: 'subjects'; data: Subject[] };
+
+async function updateCache(payload: CachePayload): Promise<void> {
+  switch (payload.key) {
+    case 'classes': return cacheClasses(payload.data);
+    case 'students': return cacheStudents(payload.data);
+    case 'subjects': return cacheSubjects(payload.data);
+  }
+}
+
+async function getFromCache(key: string) {
+  switch (key) {
+    case 'classes': return getCachedClasses();
+    case 'students': return getCachedStudents();
+    case 'subjects': return getCachedSubjects();
+    case 'sessions': return getCachedSessions();
+    default: return null;
+  }
+}
 
 export async function offlineRequest<T>(
   request: () => Promise<T>,
   options: {
-    cacheKey?: string;
+    cacheKey?: CachePayload['key'] | 'sessions';
     cacheDuration?: number;
     queueIfOffline?: boolean;
     mutation?: Omit<SyncQueueItem, 'id' | 'timestamp'>;
@@ -18,7 +41,9 @@ export async function offlineRequest<T>(
   if (isOnline) {
     try {
       const data = await request();
-      if (options.cacheKey) await updateCache(options.cacheKey, data);
+      if (options.cacheKey && options.cacheKey !== 'sessions') {
+        await updateCache({ key: options.cacheKey, data: data as Class[] | Student[] | Subject[] } as CachePayload);
+      }
       return data;
     } catch (error) {
       if (options.queueIfOffline && options.mutation) {
@@ -30,8 +55,8 @@ export async function offlineRequest<T>(
   }
 
   if (options.cacheKey) {
-    const cachedData = await getFromCache(options.cacheKey);
-    if (cachedData) return cachedData as T;
+    const cached = await getFromCache(options.cacheKey);
+    if (cached) return cached as T;
   }
 
   if (options.queueIfOffline && options.mutation) {
@@ -40,22 +65,4 @@ export async function offlineRequest<T>(
   }
 
   throw new Error('Offline and no cached data available');
-}
-
-async function updateCache(key: string, data: unknown) {
-  switch (key) {
-    case 'classes': await cacheClasses(data as Class[]); break;
-    case 'students': await cacheStudents(data as Student[]); break;
-    case 'subjects': await cacheSubjects(data as Subject[]); break;
-  }
-}
-
-async function getFromCache(key: string) {
-  switch (key) {
-    case 'classes': return await getCachedClasses();
-    case 'students': return await getCachedStudents();
-    case 'subjects': return await getCachedSubjects();
-    case 'sessions': return await getCachedSessions();
-    default: return null;
-  }
 }

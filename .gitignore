@@ -43,3 +43,7 @@ yarn-error.log*
 /public/workbox-*.js.map
 .env
 !.env.example
+
+# typescript
+next-env.d.ts
+*.tsbuildinfo
