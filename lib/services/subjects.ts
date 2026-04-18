@@ -15,6 +15,10 @@ export const createSubject = async (payload: CreateSubjectPayload): Promise<void
   await apiClient.post('/api/subjects', payload);
 };
 
+export const updateSubject = async (id: number, payload: CreateSubjectPayload): Promise<void> => {
+  await apiClient.put(`/api/subjects/${id}`, payload);
+};
+
 export const deleteSubject = async (id: number): Promise<void> => {
   await apiClient.delete(`/api/subjects/${id}`);
 };
