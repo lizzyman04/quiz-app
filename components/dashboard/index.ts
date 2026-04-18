@@ -4,4 +4,5 @@ export * from './StatsCard';
 export * from './ClassForm';
 export * from './SubjectForm';
 export * from './StudentForm';
+export * from './SessionForm';
 export * from './ConfirmDialog';

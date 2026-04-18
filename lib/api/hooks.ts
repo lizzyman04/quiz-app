@@ -61,6 +61,23 @@ export const useCreateSession = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['sessions'] })
   });
 };
+export const useDeleteSession = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => offlineRequest(() => svc.deleteSession(id), { queueIfOffline: true, mutation: { endpoint: `/api/sessions/${id}`, method: 'DELETE', data: null } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['sessions'] })
+  });
+};
+export const useUpdateSessionStatus = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number, data: T.UpdateSessionStatusPayload }) => offlineRequest(() => svc.updateSessionStatus(id, data), { queueIfOffline: true, mutation: { endpoint: `/api/sessions/${id}/status`, method: 'PATCH', data } }),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ['sessions'] });
+      qc.invalidateQueries({ queryKey: ['sessions', variables.id] });
+    }
+  });
+};
 
 export const useTeachers = () => useQuery({ queryKey: ['teachers'], queryFn: () => svc.getTeachers() });
 export const useSessionQuestions = (sid: number) => useQuery({ queryKey: ['questions', sid], queryFn: () => svc.getSessionQuestions(sid) });
