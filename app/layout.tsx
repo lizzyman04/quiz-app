@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "./providers";
+import { InstallPrompt } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Quiz App",
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans">
         <Providers>
           {children}
+          <InstallPrompt />
         </Providers>
       </body>
     </html>

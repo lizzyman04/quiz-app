@@ -1,0 +1,48 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+
+export function usePWAInstall() {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  useEffect(() => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    setIsInstalled(isStandalone);
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+      
+      const dismissedUntil = localStorage.getItem('pwa-prompt-dismissed-until');
+      if (!dismissedUntil || new Date().getTime() > parseInt(dismissedUntil)) {
+        if (!isStandalone) setShowPrompt(true);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const promptInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstalled(true);
+      setShowPrompt(false);
+    }
+    setDeferredPrompt(null);
+  };
+
+  const dismissPrompt = () => {
+    setShowPrompt(false);
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    localStorage.setItem('pwa-prompt-dismissed-until', (new Date().getTime() + sevenDays).toString());
+  };
+
+  return { isInstallable, isInstalled, showPrompt, promptInstall, dismissPrompt };
+}
