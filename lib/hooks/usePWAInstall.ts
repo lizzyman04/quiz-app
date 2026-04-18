@@ -1,49 +1,54 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 export function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches
+  );
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    setIsInstalled(isStandalone);
-    if (isStandalone) return;
+    if (isInstalled) return;
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      const promptEvent = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(promptEvent);
       setIsInstallable(true);
-      
+
       const dismissedUntil = localStorage.getItem('pwa-prompt-dismissed-until');
-      if (!dismissedUntil || Date.now() > parseInt(dismissedUntil)) {
+      if (!dismissedUntil || Date.now() > parseInt(dismissedUntil, 10)) {
         setShowPrompt(true);
       }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
+  }, [isInstalled]);
 
-  const promptInstall = async () => {
+  const promptInstall = useCallback(async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      setIsInstalled(true);
       setShowPrompt(false);
     }
     setDeferredPrompt(null);
-  };
+  }, [deferredPrompt]);
 
-  const dismissPrompt = () => {
+  const dismissPrompt = useCallback(() => {
     setShowPrompt(false);
-    const sevenDays = 7 * 24 * 60 * 60 * 1000;
-    localStorage.setItem('pwa-prompt-dismissed-until', String(Date.now() + sevenDays));
-  };
+    const threeDays = 3 * 24 * 60 * 60 * 1000;
+    localStorage.setItem('pwa-prompt-dismissed-until', String(Date.now() + threeDays));
+  }, []);
 
   return { isInstallable, isInstalled, showPrompt, promptInstall, dismissPrompt };
 }
