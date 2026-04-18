@@ -2,25 +2,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Subject } from '@/lib/types';
 
 interface SubjectFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
-  initialData?: Subject | null;
   isLoading?: boolean;
 }
 
 export const SubjectForm: React.FC<SubjectFormProps> = ({
-  isOpen, onClose, onSubmit, initialData, isLoading
+  isOpen, onClose, onSubmit, isLoading
 }) => {
   const [name, setName] = useState('');
 
   useEffect(() => {
-    if (initialData) setName(initialData.name);
-    else setName('');
-  }, [initialData, isOpen]);
+    if (!isOpen) setName('');
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -33,9 +30,7 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <h3 className="text-xl font-black text-slate-900">
-            {initialData ? 'Editar Disciplina' : 'Nova Disciplina'}
-          </h3>
+          <h3 className="text-xl font-black text-slate-900">Nova Disciplina</h3>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl transition-colors">
             <X className="w-6 h-6" />
           </button>

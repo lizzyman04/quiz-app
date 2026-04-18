@@ -1,20 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, BookOpen } from 'lucide-react';
-import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject } from '@/lib/api';
+import { Plus, Trash2, Search, BookOpen } from 'lucide-react';
+import { useSubjects, useCreateSubject, useDeleteSubject } from '@/lib/api';
 import { SubjectForm, ConfirmDialog } from '@/components/dashboard';
 import type { Subject } from '@/lib/types';
 
 export default function SubjectsPage() {
   const { data: subjects, isLoading } = useSubjects();
   const createSubject = useCreateSubject();
-  const updateSubject = useUpdateSubject();
   const deleteSubject = useDeleteSubject();
 
   const [search, setSearch] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
   const [deletingSubject, setDeletingSubject] = useState<Subject | null>(null);
 
   const filteredSubjects = subjects?.filter(s => 
@@ -23,13 +21,8 @@ export default function SubjectsPage() {
 
   const handleFormSubmit = async (name: string) => {
     try {
-      if (editingSubject) {
-        await updateSubject.mutateAsync({ id: editingSubject.id, data: { name } });
-      } else {
-        await createSubject.mutateAsync({ name });
-      }
+      await createSubject.mutateAsync({ name });
       setIsFormOpen(false);
-      setEditingSubject(null);
     } catch (err) {
       console.error(err);
     }
@@ -60,7 +53,7 @@ export default function SubjectsPage() {
           />
         </div>
         <button
-          onClick={() => { setEditingSubject(null); setIsFormOpen(true); }}
+          onClick={() => setIsFormOpen(true)}
           className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-[0.98]"
         >
           <Plus className="w-5 h-5" /> Nova Disciplina
@@ -94,12 +87,6 @@ export default function SubjectsPage() {
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => { setEditingSubject(sub); setIsFormOpen(true); }}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button
                         onClick={() => setDeletingSubject(sub)}
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                       >
@@ -118,8 +105,7 @@ export default function SubjectsPage() {
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleFormSubmit}
-        initialData={editingSubject}
-        isLoading={createSubject.isPending || updateSubject.isPending}
+        isLoading={createSubject.isPending}
       />
 
       <ConfirmDialog

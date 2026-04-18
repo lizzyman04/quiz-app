@@ -12,13 +12,6 @@ export const useCreateClass = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['classes'] })
   });
 };
-export const useUpdateClass = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number, data: T.CreateClassPayload }) => offlineRequest(() => svc.updateClass(id, data), { queueIfOffline: true, mutation: { endpoint: `/api/classes/${id}`, method: 'PUT', data } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['classes'] })
-  });
-};
 export const useDeleteClass = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -35,13 +28,6 @@ export const useCreateSubject = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (p: T.CreateSubjectPayload) => offlineRequest(() => svc.createSubject(p), { queueIfOffline: true, mutation: { endpoint: '/api/subjects', method: 'POST', data: p } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['subjects'] })
-  });
-};
-export const useUpdateSubject = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number, data: T.CreateSubjectPayload }) => offlineRequest(() => svc.updateSubject(id, data), { queueIfOffline: true, mutation: { endpoint: `/api/subjects/${id}`, method: 'PUT', data } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['subjects'] })
   });
 };

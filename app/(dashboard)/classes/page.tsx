@@ -2,20 +2,18 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Edit2, Trash2, Search, Users } from 'lucide-react';
-import { useClasses, useCreateClass, useUpdateClass, useDeleteClass } from '@/lib/api';
+import { Plus, Trash2, Search, Users } from 'lucide-react';
+import { useClasses, useCreateClass, useDeleteClass } from '@/lib/api';
 import { ClassForm, ConfirmDialog } from '@/components/dashboard';
 import type { Class } from '@/lib/types';
 
 export default function ClassesPage() {
   const { data: classes, isLoading } = useClasses();
   const createClass = useCreateClass();
-  const updateClass = useUpdateClass();
   const deleteClass = useDeleteClass();
 
   const [search, setSearch] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [deletingClass, setDeletingClass] = useState<Class | null>(null);
 
   const filteredClasses = classes?.filter(c => 
@@ -24,13 +22,8 @@ export default function ClassesPage() {
 
   const handleFormSubmit = async (name: string) => {
     try {
-      if (editingClass) {
-        await updateClass.mutateAsync({ id: editingClass.id, data: { name } });
-      } else {
-        await createClass.mutateAsync({ name });
-      }
+      await createClass.mutateAsync({ name });
       setIsFormOpen(false);
-      setEditingClass(null);
     } catch (err) {
       console.error(err);
     }
@@ -61,7 +54,7 @@ export default function ClassesPage() {
           />
         </div>
         <button
-          onClick={() => { setEditingClass(null); setIsFormOpen(true); }}
+          onClick={() => setIsFormOpen(true)}
           className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all active:scale-[0.98]"
         >
           <Plus className="w-5 h-5" /> Nova Turma
@@ -95,12 +88,6 @@ export default function ClassesPage() {
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => { setEditingClass(cls); setIsFormOpen(true); }}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
-                      >
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button
                         onClick={() => setDeletingClass(cls)}
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                       >
@@ -119,8 +106,7 @@ export default function ClassesPage() {
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleFormSubmit}
-        initialData={editingClass}
-        isLoading={createClass.isPending || updateClass.isPending}
+        isLoading={createClass.isPending}
       />
 
       <ConfirmDialog

@@ -43,9 +43,6 @@ export default function ClassDetailsPage({ params }: PageProps) {
         </div>
         
         <div className="flex gap-2 w-full sm:w-auto">
-          <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-700 font-bold rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-all">
-            <Edit2 className="w-4 h-4" /> Editar
-          </button>
           <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98]">
             <UserPlus className="w-5 h-5" /> Adicionar Aluno
           </button>

@@ -15,10 +15,6 @@ export const createClass = async (payload: CreateClassPayload): Promise<void> =>
   await apiClient.post('/api/classes', payload);
 };
 
-export const updateClass = async (id: number, payload: CreateClassPayload): Promise<void> => {
-  await apiClient.put(`/api/classes/${id}`, payload);
-};
-
 export const deleteClass = async (id: number): Promise<void> => {
   await apiClient.delete(`/api/classes/${id}`);
 };
