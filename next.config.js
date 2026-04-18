@@ -25,7 +25,7 @@ const withPWA = withPWAInit({
 const nextConfig = {
   // next config options
   turbopack: {},
-  allowedDevOrigins: process.env.NODE_ENV === 'development' ? ['*'] : [],
+  allowedDevOrigins: ['*'],
 };
 
 export default withPWA(nextConfig);

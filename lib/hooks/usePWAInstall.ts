@@ -11,6 +11,7 @@ export function usePWAInstall() {
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     setIsInstalled(isStandalone);
+    if (isStandalone) return;
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -18,8 +19,8 @@ export function usePWAInstall() {
       setIsInstallable(true);
       
       const dismissedUntil = localStorage.getItem('pwa-prompt-dismissed-until');
-      if (!dismissedUntil || new Date().getTime() > parseInt(dismissedUntil)) {
-        if (!isStandalone) setShowPrompt(true);
+      if (!dismissedUntil || Date.now() > parseInt(dismissedUntil)) {
+        setShowPrompt(true);
       }
     };
 
@@ -41,7 +42,7 @@ export function usePWAInstall() {
   const dismissPrompt = () => {
     setShowPrompt(false);
     const sevenDays = 7 * 24 * 60 * 60 * 1000;
-    localStorage.setItem('pwa-prompt-dismissed-until', (new Date().getTime() + sevenDays).toString());
+    localStorage.setItem('pwa-prompt-dismissed-until', String(Date.now() + sevenDays));
   };
 
   return { isInstallable, isInstalled, showPrompt, promptInstall, dismissPrompt };
