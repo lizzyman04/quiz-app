@@ -3,33 +3,54 @@
 import React from 'react';
 import { Users, GraduationCap, Calendar, HelpCircle } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard';
+import { useClasses, useStudents, useSessions } from '@/lib/api';
+import * as svc from '@/lib/services';
+import { useQueries } from '@tanstack/react-query';
 
 export default function DashboardHome() {
+  const { data: classes, isLoading: isLoadingClasses } = useClasses();
+  const { data: students, isLoading: isLoadingStudents } = useStudents();
+  const { data: sessions, isLoading: isLoadingSessions } = useSessions();
+
+  // Fetch questions count for each session to get total questions
+  const sessionQuestionsQueries = useQueries({
+    queries: (sessions || []).map(session => ({
+      queryKey: ['questions', session.id],
+      queryFn: () => svc.getSessionQuestions(session.id),
+      enabled: !!sessions,
+    }))
+  });
+
+  const isLoadingQuestions = sessionQuestionsQueries.some(q => q.isLoading);
+  const totalQuestions = sessionQuestionsQueries.reduce((acc, q) => acc + (q.data?.length || 0), 0);
+  const activeSessions = sessions?.filter(s => s.status === 'active').length || 0;
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard 
           title="Total de Turmas" 
-          value="12" 
+          value={classes?.length || 0} 
           icon={Users} 
-          trend={{ value: 8, isUp: true }}
+          isLoading={isLoadingClasses}
         />
         <StatsCard 
           title="Total de Alunos" 
-          value="342" 
+          value={students?.length || 0} 
           icon={GraduationCap} 
-          trend={{ value: 12, isUp: true }}
+          isLoading={isLoadingStudents}
         />
         <StatsCard 
           title="Sessões Ativas" 
-          value="5" 
+          value={activeSessions} 
           icon={Calendar} 
+          isLoading={isLoadingSessions}
         />
         <StatsCard 
           title="Questões Cadastradas" 
-          value="1,240" 
+          value={totalQuestions} 
           icon={HelpCircle} 
-          trend={{ value: 4, isUp: true }}
+          isLoading={isLoadingSessions || isLoadingQuestions}
         />
       </div>
 
