@@ -81,5 +81,15 @@ export const useUpdateSessionStatus = () => {
 
 export const useTeachers = () => useQuery({ queryKey: ['teachers'], queryFn: () => svc.getTeachers() });
 export const useSessionQuestions = (sid: number) => useQuery({ queryKey: ['questions', sid], queryFn: () => svc.getSessionQuestions(sid) });
+export const useAddQuestion = (sessionId: number) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: T.CreateQuestionPayload) => offlineRequest(() => svc.addQuestion(sessionId, payload), { queueIfOffline: true, mutation: { endpoint: `/api/sessions/${sessionId}/questions`, method: 'POST', data: payload } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['questions', sessionId] });
+      qc.invalidateQueries({ queryKey: ['sessions'] });
+    }
+  });
+};
 export const useSessionScores = (sid: number) => useQuery({ queryKey: ['scores', sid], queryFn: () => svc.getSessionScores(sid) });
 export const useSyncScores = () => useMutation({ mutationFn: (p: T.ScoreSyncPayload[]) => svc.syncScores(p) });

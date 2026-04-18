@@ -5,4 +5,5 @@ export * from './ClassForm';
 export * from './SubjectForm';
 export * from './StudentForm';
 export * from './SessionForm';
+export * from './QuestionForm';
 export * from './ConfirmDialog';

@@ -1,14 +1,16 @@
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ArrowLeft, Play, CheckCircle, RotateCcw, 
   Plus, Upload, HelpCircle, Clock, BookOpen, Users 
 } from 'lucide-react';
-import { useSessionQuestions, useUpdateSessionStatus, useClasses, useSubjects } from '@/lib/api';
+import { useSessionQuestions, useUpdateSessionStatus, useClasses, useSubjects, useAddQuestion } from '@/lib/api';
 import * as svc from '@/lib/services';
 import { useQuery } from '@tanstack/react-query';
+import { QuestionForm } from '@/components/dashboard';
+import type { CreateQuestionPayload } from '@/lib/types';
 
 const statusConfig = {
   draft: { label: 'Rascunho', color: 'bg-slate-100 text-slate-600' },
@@ -25,6 +27,8 @@ export default function SessionDetailsPage({ params }: PageProps) {
   const sid = parseInt(id);
   const router = useRouter();
 
+  const [isQuestionFormOpen, setIsQuestionFormOpen] = useState(false);
+
   const { data: session, isLoading: isLoadingSession } = useQuery({
     queryKey: ['sessions', sid],
     queryFn: () => svc.getSessionById(sid)
@@ -34,6 +38,7 @@ export default function SessionDetailsPage({ params }: PageProps) {
   const { data: classes } = useClasses();
   const { data: subjects } = useSubjects();
   const updateStatus = useUpdateSessionStatus();
+  const addQuestion = useAddQuestion(sid);
 
   if (isLoadingSession) return <div className="p-8 text-center text-slate-400 font-medium">Carregando detalhes...</div>;
   if (!session) return <div className="p-8 text-center text-red-500 font-bold">Sessão não encontrada.</div>;
@@ -43,6 +48,15 @@ export default function SessionDetailsPage({ params }: PageProps) {
   const handleStatusChange = async (status: 'draft' | 'active' | 'completed') => {
     try {
       await updateStatus.mutateAsync({ id: sid, data: { status } });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddQuestion = async (data: CreateQuestionPayload) => {
+    try {
+      await addQuestion.mutateAsync(data);
+      setIsQuestionFormOpen(false);
     } catch (err) {
       console.error(err);
     }
@@ -116,7 +130,7 @@ export default function SessionDetailsPage({ params }: PageProps) {
                   <Upload className="w-5 h-5" />
                 </button>
                 <button 
-                  onClick={() => alert('Em desenvolvimento')}
+                  onClick={() => setIsQuestionFormOpen(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all active:scale-[0.95]"
                 >
                   <Plus className="w-4 h-4" /> Adicionar
@@ -130,7 +144,7 @@ export default function SessionDetailsPage({ params }: PageProps) {
               ) : !questions || questions.length === 0 ? (
                 <div className="p-12 text-center">
                   <p className="text-slate-400 font-medium mb-4">Nenhuma questão cadastrada para esta sessão.</p>
-                  <button onClick={() => alert('Em desenvolvimento')} className="text-blue-600 font-bold hover:underline">
+                  <button onClick={() => setIsQuestionFormOpen(true)} className="text-blue-600 font-bold hover:underline">
                     Começar a adicionar questões
                   </button>
                 </div>
@@ -208,16 +222,15 @@ export default function SessionDetailsPage({ params }: PageProps) {
               </div>
             </div>
           </div>
-          
-          <div className="bg-blue-600 p-6 rounded-3xl text-white shadow-xl shadow-blue-100">
-            <h4 className="font-bold mb-2">Dica do Professor</h4>
-            <p className="text-blue-100 text-sm leading-relaxed">
-              Sessões ativas podem ser acessadas pelos alunos usando o código da sessão. 
-              Certifique-se de que todas as questões foram revisadas antes de iniciar.
-            </p>
-          </div>
         </div>
       </div>
+
+      <QuestionForm
+        isOpen={isQuestionFormOpen}
+        onClose={() => setIsQuestionFormOpen(false)}
+        onSubmit={handleAddQuestion}
+        isLoading={addQuestion.isPending}
+      />
     </div>
   );
 }
