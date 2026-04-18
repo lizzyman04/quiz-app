@@ -19,18 +19,20 @@
 - [x] Create Zustand UI store
 - [x] Integrate with React Query
 
-**Phase 4: Teacher Dashboard UI ⏳**
-- [ ] Classes management page (CRUD)
-- [ ] Students management page (CRUD)
-- [ ] Subjects management page (CRUD)
+**Phase 4: Teacher Dashboard UI ✅**
+- [x] Dashboard layout with sidebar and header
+- [x] Stats cards with real API data
+- [x] Classes management page (CRUD)
+- [x] Students management page (CRUD)
+- [x] Subjects management page (CRUD)
 - [ ] Teachers management page (CRUD)
 
-**Phase 5: Quiz Session Management ⏳**
-- [ ] Sessions list page
-- [ ] Create session form (with class, subject, timer)
-- [ ] Question management interface
-- [ ] Bulk question upload (text format)
-- [ ] Session status controls (draft → active → completed)
+**Phase 5: Quiz Session Management ✅**
+- [x] Sessions list page
+- [x] Create session form (with class, subject, timer)
+- [x] Question management interface (add single)
+- [x] Session status controls (draft → active → completed)
+- [ ] Bulk question upload (text format) - pending
 
 **Phase 6: Student Quiz Experience ✅**
 - [x] Join quiz by session code page
@@ -48,11 +50,12 @@
 - [x] Sync status indicators in UI
 
 **Phase 8: Polish & Advanced Features ⏳**
-- [ ] Teacher Dashboard (CRUD for all entities)
+- [x] PWA installation prompt (with 3-day dismiss)
+- [x] CORS allowed origins fix
 - [ ] Bulk question upload interface
 - [ ] Real-time leaderboard for active sessions
 - [ ] Historical results view
 - [ ] Authentication (teacher login)
-- [ ] PWA installation prompt enhancements
+- [ ] Teachers management page (CRUD)
 - [ ] Loading states and error boundaries
 - [ ] End-to-end testing with Playwright
